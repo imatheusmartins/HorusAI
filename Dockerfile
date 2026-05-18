@@ -10,7 +10,8 @@ COPY best.pt ./best.pt
 
 ENV MODEL_PATH=best.pt
 ENV TOP_K=3
+ENV YOLO_CONFIG_DIR=/tmp/Ultralytics
 
-EXPOSE 8000
+EXPOSE 7860
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}"]

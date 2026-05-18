@@ -1,3 +1,12 @@
+---
+title: HorusAI Model API
+emoji: 👁️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
+
 # API de Inferencia para Retinopatia Diabetica
 
 API HTTP desenvolvida com FastAPI para executar inferencias com um modelo YOLO treinado para analise de imagens de fundo de olho.
