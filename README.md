@@ -1,38 +1,33 @@
 # API de Inferencia para Retinopatia Diabetica
 
-Este projeto expoe uma API HTTP para servir um modelo YOLO a partir da sua aplicacao Java com Spring Boot.
+API HTTP desenvolvida com FastAPI para executar inferencias com um modelo YOLO treinado para analise de imagens de fundo de olho.
 
-## Modelo utilizado
+## Tecnologias
 
-Na configuracao atual deste projeto, o modelo principal carregado pela API e `best.pt`.
+- Python
+- FastAPI
+- Ultralytics YOLO
+- Pillow
+- Uvicorn
 
-Observacao:
+## Estrutura do projeto
 
-- Agora o projeto esta configurado para carregar diretamente um arquivo `.pt` real.
-- O modelo principal esperado e `best.pt`.
-- A API detecta automaticamente se o checkpoint retorna classificacao ou deteccao e serializa a resposta conforme a tarefa do modelo.
-
-## Arquitetura sugerida
-
-- Spring Boot: interface web, autenticacao, fluxo SaaS, persistencia e orquestracao.
-- FastAPI + Ultralytics: servico isolado de inferencia.
-- Comunicacao: `multipart/form-data` enviando a imagem para `POST /predict`.
-
-## Estrutura
-
-- `app/main.py`: endpoints HTTP
-- `app/model_service.py`: carga do modelo e inferencia
-- `app/schemas.py`: contratos de resposta
-- `requirements.txt`: dependencias Python
-- `Dockerfile`: containerizacao
+- `app/main.py`: definicao dos endpoints HTTP
+- `app/model_service.py`: carregamento do modelo e processamento das inferencias
+- `app/schemas.py`: modelos de resposta da API
+- `best.pt`: modelo utilizado pela aplicacao
+- `requirements.txt`: dependencias do projeto
+- `Dockerfile`: imagem para execucao em container
 
 ## Endpoints
 
-- `GET /health`
-- `GET /model/info`
-- `POST /predict`
+| Metodo | Rota | Descricao |
+| --- | --- | --- |
+| `GET` | `/health` | Verifica o status da API e do modelo carregado |
+| `GET` | `/model/info` | Retorna informacoes do modelo em uso |
+| `POST` | `/predict` | Recebe uma imagem e retorna a inferencia |
 
-## Como executar
+## Execucao local
 
 ```bash
 python -m venv .venv
@@ -41,15 +36,20 @@ pip install -r requirements.txt
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
+Com a aplicacao em execucao:
+
+- Swagger UI: `http://localhost:8000/docs`
+- Health check: `http://localhost:8000/health`
+
 ## Variaveis de ambiente
 
-```bash
-MODEL_PATH=best.pt
-TOP_K=3
-API_TITLE=Retinopathy Inference API
-```
+| Variavel | Valor padrao | Descricao |
+| --- | --- | --- |
+| `MODEL_PATH` | `best.pt` | Caminho do arquivo do modelo |
+| `TOP_K` | `3` | Quantidade maxima de predicoes retornadas |
+| `API_TITLE` | `Retinopathy Inference API` | Titulo exibido na documentacao da API |
 
-## Exemplo com curl
+## Exemplo de requisicao
 
 ```bash
 curl -X POST "http://localhost:8000/predict" ^
@@ -58,26 +58,7 @@ curl -X POST "http://localhost:8000/predict" ^
   -F "file=@C:\caminho\imagem_fundo_olho.jpg"
 ```
 
-## Exemplo de consumo no Spring Boot
-
-Com `WebClient`, o fluxo fica assim:
-
-```java
-MultipartBodyBuilder builder = new MultipartBodyBuilder();
-builder.part("file", imageResource);
-
-PredictionResponse response = webClient.post()
-    .uri("http://localhost:8000/predict")
-    .contentType(MediaType.MULTIPART_FORM_DATA)
-    .body(BodyInserters.fromMultipartData(builder.build()))
-    .retrieve()
-    .bodyToMono(PredictionResponse.class)
-    .block();
-```
-
-## Resposta esperada
-
-Para deteccao, a API retorna algo neste formato:
+## Exemplo de resposta
 
 ```json
 {
@@ -91,10 +72,6 @@ Para deteccao, a API retorna algo neste formato:
     {
       "label": "microaneurysm",
       "confidence": 0.91
-    },
-    {
-      "label": "hemorrhage",
-      "confidence": 0.06
     }
   ],
   "detections": [
@@ -112,13 +89,6 @@ Para deteccao, a API retorna algo neste formato:
 }
 ```
 
-Se depois voce voltar para um modelo de classificacao, a API ja tem suporte para retornar `top_prediction` e `predictions` sem a lista de `detections`.
+## Integracao
 
-## Observacao academica
-
-Para o TCC, esta separacao entre aplicacao web e microservico de inferencia e uma boa decisao arquitetural porque:
-
-- desacopla o ciclo de vida do modelo da aplicacao Java;
-- facilita troca de modelo sem reescrever a camada web;
-- permite escalar inferencia separadamente;
-- deixa claro o papel do servico de IA dentro da arquitetura do sistema.
+A API pode ser consumida por outros servicos via HTTP usando `multipart/form-data` no endpoint `POST /predict`. No projeto principal, ela pode ser chamada pelo backend Spring Boot, mantendo a inferencia isolada da aplicacao web.
