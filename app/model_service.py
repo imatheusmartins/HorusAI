@@ -13,7 +13,7 @@ from app.schemas import BoundingBox, DetectionItem, PredictionItem, PredictionRe
 
 class ModelService:
     def __init__(self) -> None:
-        self.model_source = os.getenv("MODEL_PATH", "yolo26n.pt")
+        self.model_source = os.getenv("MODEL_PATH", "best.pt")
         self.top_k = int(os.getenv("TOP_K", "3"))
         self.resolved_model_file = self._resolve_model_file(self.model_source)
         self.model = YOLO(self.resolved_model_file)

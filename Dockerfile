@@ -6,9 +6,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
-COPY yolo26n.pt ./yolo26n.pt
+COPY best.pt ./best.pt
 
-ENV MODEL_PATH=yolo26n.pt
+ENV MODEL_PATH=best.pt
 ENV TOP_K=3
 
 EXPOSE 8000

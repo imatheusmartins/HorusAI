@@ -2,20 +2,15 @@
 
 Este projeto expoe uma API HTTP para servir um modelo YOLO a partir da sua aplicacao Java com Spring Boot.
 
-## Qual modelo faz mais sentido?
+## Modelo utilizado
 
-Pelos artefatos encontrados nesta pasta:
-
-- `yolo11m-cls.pt` tem nomenclatura de classificacao (`cls`), o que combina com o caso de uso de classificar um exame de fundo de olho em categorias diagnosticas.
-- `yolo26n.pt` parece um checkpoint mais completo de treino/inferencia para deteccao, com estrutura bem maior e tipica de modelos que retornam caixas/objetos.
-
-Na configuracao atual deste projeto, o modelo principal carregado pela API e `yolo26n.pt`.
+Na configuracao atual deste projeto, o modelo principal carregado pela API e `best.pt`.
 
 Observacao:
 
 - Agora o projeto esta configurado para carregar diretamente um arquivo `.pt` real.
-- O modelo principal esperado e `yolo26n.pt`.
-- Como esse checkpoint aparenta ser de deteccao, a resposta principal da API passa a ser orientada a objetos detectados.
+- O modelo principal esperado e `best.pt`.
+- A API detecta automaticamente se o checkpoint retorna classificacao ou deteccao e serializa a resposta conforme a tarefa do modelo.
 
 ## Arquitetura sugerida
 
@@ -49,7 +44,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ## Variaveis de ambiente
 
 ```bash
-MODEL_PATH=yolo26n.pt
+MODEL_PATH=best.pt
 TOP_K=3
 API_TITLE=Retinopathy Inference API
 ```
@@ -87,7 +82,7 @@ Para deteccao, a API retorna algo neste formato:
 ```json
 {
   "task": "detect",
-  "model_source": "yolo26n.pt",
+  "model_source": "best.pt",
   "top_prediction": {
     "label": "microaneurysm",
     "confidence": 0.91
