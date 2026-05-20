@@ -21,6 +21,9 @@ SEVERITY_LABELS = {
     "4": "Grau 4 — retinopatia diabética proliferativa",
 }
 
+BRAND_NAME = "Hórus"
+BRAND_LOGO_PATH = "/static/brand/horus-logo.png"
+
 BASE_CSS = """
 :root {
   color-scheme: light dark;
@@ -59,6 +62,68 @@ main { width: min(1120px, 100%); margin: 0 auto; padding: 40px 18px; }
   padding: 28px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
 }
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand-mark {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #ffffff, #dbeafe);
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.36);
+  overflow: hidden;
+}
+.brand-mark img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+}
+.brand-fallback {
+  color: #020617;
+  font-weight: 950;
+  font-size: 25px;
+  letter-spacing: -0.08em;
+}
+.brand-text strong {
+  display: block;
+  font-size: 21px;
+  letter-spacing: -0.03em;
+}
+.brand-text span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 2px;
+}
+.topnav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.topnav a {
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 13px;
+  background: rgba(15, 23, 42, 0.58);
+}
+.topnav a:hover { color: var(--text); border-color: rgba(56, 189, 248, 0.48); }
 .eyebrow { color: var(--accent); font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 h1 { margin: 10px 0 12px; font-size: clamp(34px, 6vw, 58px); line-height: 1.02; letter-spacing: -0.04em; }
 h2 { margin: 0 0 14px; font-size: 24px; }
@@ -103,6 +168,7 @@ pre { overflow: auto; background: #020617; border: 1px solid var(--border); bord
 .empty { background: var(--panel-soft); border: 1px dashed var(--border); border-radius: 20px; padding: 24px; margin-top: 22px; }
 .notice { border-left: 4px solid var(--accent); padding-left: 14px; }
 @media (max-width: 860px) { .hero, .grid { grid-template-columns: 1fr; } main { padding-top: 20px; } }
+@media (max-width: 640px) { .topbar { align-items: flex-start; flex-direction: column; } .topnav { justify-content: flex-start; } }
 """
 
 app = FastAPI(title=os.getenv("API_TITLE", "Retinopathy Inference API"))
@@ -160,6 +226,31 @@ def page_shell(title: str, body: str) -> str:
     """
 
 
+def brand_header() -> str:
+    logo_file = static_dir / "brand" / "horus-logo.png"
+    if logo_file.exists():
+        mark = f'<img src="{BRAND_LOGO_PATH}" alt="Logo {BRAND_NAME}" />'
+    else:
+        mark = '<span class="brand-fallback">H</span>'
+
+    return f"""
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark">{mark}</span>
+        <span class="brand-text">
+          <strong>{BRAND_NAME}</strong>
+          <span>Triagem de retinopatia diabética</span>
+        </span>
+      </a>
+      <nav class="topnav" aria-label="Navegação principal">
+        <a href="/">Inferência</a>
+        <a href="/samples">Imagens de teste</a>
+        <a href="/docs">API</a>
+      </nav>
+    </header>
+    """
+
+
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
     severity_json = SEVERITY_LABELS
@@ -167,10 +258,11 @@ def index() -> str:
         "HorusAI — Classificação de Retinopatia Diabética",
         f"""
         <main>
+          {brand_header()}
           <section class="hero">
             <div class="card">
               <div class="eyebrow">Protótipo de inferência</div>
-              <h1>Classificação de retinopatia diabética por imagem de fundo de olho</h1>
+              <h1>{BRAND_NAME}: classificação de retinopatia diabética por imagem de fundo de olho</h1>
               <p>
                 Envie uma retinografia colorida para estimar o grau de retinopatia diabética em uma escala de 0 a 4.
                 O resultado é uma predição computacional para fins acadêmicos e não substitui avaliação médica.
@@ -325,6 +417,7 @@ def samples() -> str:
         "HorusAI — Imagens de exemplo",
         f"""
         <main>
+          {brand_header()}
           <section class="card">
             <div class="eyebrow">Base de demonstração</div>
             <h1>Imagens para teste do modelo</h1>

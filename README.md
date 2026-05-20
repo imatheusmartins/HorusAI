@@ -7,9 +7,9 @@ sdk: docker
 app_port: 7860
 ---
 
-# API de Inferência para Retinopatia Diabética
+# Hórus — API de Inferência para Retinopatia Diabética
 
-API HTTP desenvolvida com FastAPI para classificar imagens de fundo de olho usando um modelo YOLO treinado para retinopatia diabética.
+API HTTP do Hórus, desenvolvida com FastAPI para classificar imagens de fundo de olho usando um modelo YOLO treinado para retinopatia diabética.
 
 O serviço recebe uma imagem por `multipart/form-data` e retorna o grau estimado da doença em uma escala de 0 a 4.
 
@@ -27,6 +27,7 @@ O serviço recebe uma imagem por `multipart/form-data` e retorna o grau estimado
 - `app/main.py`: endpoints HTTP e interface web do protótipo
 - `app/model_service.py`: carregamento do modelo e execução da inferência
 - `app/schemas.py`: modelos de resposta da API
+- `app/static/brand`: arquivos de identidade visual da aplicação
 - `app/static/samples`: imagens de exemplo para demonstração
 - `best.pt`: modelo utilizado pela aplicação
 - `requirements.txt`: dependências do projeto
@@ -153,3 +154,13 @@ A API pode ser consumida por outros serviços via HTTP usando `multipart/form-da
 ## Hugging Face Spaces
 
 O projeto pode ser executado como Docker Space no Hugging Face. A rota raiz `/` disponibiliza uma interface web para demonstração do protótipo, enquanto `/docs` mantém a documentação interativa da API.
+
+## Identidade visual
+
+A interface web utiliza a identidade visual do Hórus. Para exibir a logo na aplicação, salve o arquivo PNG em:
+
+```text
+app/static/brand/horus-logo.png
+```
+
+Como a logo original é preta, ela é exibida sobre um bloco claro para preservar contraste no tema escuro da interface.
