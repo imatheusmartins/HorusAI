@@ -37,4 +37,8 @@ app/static/samples/*.jpg filter=lfs diff=lfs merge=lfs -text
 app/static/samples/*.jpeg filter=lfs diff=lfs merge=lfs -text
 app/static/samples/*.png filter=lfs diff=lfs merge=lfs -text
 app/static/samples/*.webp filter=lfs diff=lfs merge=lfs -text
+app/static/brand/*.png filter=lfs diff=lfs merge=lfs -text
+app/static/brand/*.jpg filter=lfs diff=lfs merge=lfs -text
+app/static/brand/*.jpeg filter=lfs diff=lfs merge=lfs -text
+app/static/brand/*.webp filter=lfs diff=lfs merge=lfs -text
 app/static/brand/* filter=lfs diff=lfs merge=lfs -text
