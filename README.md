@@ -47,6 +47,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 Com a aplicacao em execucao:
 
+- Interface web: `http://localhost:8000/`
 - Swagger UI: `http://localhost:8000/docs`
 - Health check: `http://localhost:8000/health`
 
@@ -101,3 +102,7 @@ curl -X POST "http://localhost:8000/predict" ^
 ## Integracao
 
 A API pode ser consumida por outros servicos via HTTP usando `multipart/form-data` no endpoint `POST /predict`. No projeto principal, ela pode ser chamada pelo backend Spring Boot, mantendo a inferencia isolada da aplicacao web.
+
+## Hugging Face Spaces
+
+O projeto tambem pode ser executado como Docker Space no Hugging Face. A rota raiz `/` disponibiliza uma interface simples para upload de imagem e teste do modelo. A documentacao interativa da API permanece disponivel em `/docs`.
