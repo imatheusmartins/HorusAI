@@ -328,10 +328,6 @@ def samples() -> str:
           <section class="card">
             <div class="eyebrow">Base de demonstração</div>
             <h1>Imagens para teste do modelo</h1>
-            <p>
-              Use estas imagens para demonstrar a classificação do protótipo em diferentes graus de retinopatia diabética.
-              O grau esperado é identificado no final do nome do arquivo, antes da extensão.
-            </p>
             <div class="links">
               <a class="button" href="/">Voltar para inferência</a>
               <a class="button secondary" href="/docs">Swagger da API</a>
