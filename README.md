@@ -62,13 +62,13 @@ O modelo retorna a classe como um grau numérico:
 
 | Grau | Interpretação |
 | --- | --- |
-| `0` | Sem retinopatia diabética aparente |
-| `1` | Retinopatia diabética leve |
-| `2` | Retinopatia diabética moderada |
-| `3` | Retinopatia diabética severa |
+| `0` | Sem retinopatia diabética |
+| `1` | Retinopatia leve |
+| `2` | Retinopatia moderada |
+| `3` | Retinopatia grave |
 | `4` | Retinopatia diabética proliferativa |
 
-O grau `4` representa o estágio mais grave na escala utilizada pelo protótipo.
+O grau `4` representa retinopatia diabética proliferativa, o estágio mais grave na escala utilizada pelo protótipo.
 
 ## Execução local
 
@@ -131,7 +131,20 @@ curl -X POST "http://localhost:8000/predict" ^
 }
 ```
 
-Nesse exemplo, a principal predição do modelo é o grau `1`, correspondente a retinopatia diabética leve.
+Nesse exemplo, a principal predição do modelo é o grau `1`, correspondente a retinopatia leve.
+
+## Imagens de exemplo
+
+As imagens de demonstração ficam em `app/static/samples` e são exibidas automaticamente na página `/samples`.
+
+O grau esperado deve estar no final do nome do arquivo, antes da extensão:
+
+```text
+869_right_1.jpeg -> grau 1
+217_left_4.jpeg  -> grau 4
+```
+
+Arquivos com extensão `jpg`, `jpeg`, `png` ou `webp` são considerados pela galeria.
 
 ## Integração
 

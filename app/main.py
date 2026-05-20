@@ -1,6 +1,8 @@
 ﻿from __future__ import annotations
 
 import os
+import re
+from html import escape
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -12,14 +14,12 @@ from app.schemas import HealthResponse, ModelInfoResponse, PredictionResponse
 
 
 SEVERITY_LABELS = {
-    "0": "Grau 0 — sem retinopatia diabética aparente",
-    "1": "Grau 1 — retinopatia diabética leve",
-    "2": "Grau 2 — retinopatia diabética moderada",
-    "3": "Grau 3 — retinopatia diabética severa",
+    "0": "Grau 0 — sem retinopatia diabética",
+    "1": "Grau 1 — retinopatia leve",
+    "2": "Grau 2 — retinopatia moderada",
+    "3": "Grau 3 — retinopatia grave",
     "4": "Grau 4 — retinopatia diabética proliferativa",
 }
-
-SAMPLE_IMAGES: list[dict[str, str]] = []
 
 BASE_CSS = """
 :root {
@@ -97,6 +97,9 @@ pre { overflow: auto; background: #020617; border: 1px solid var(--border); bord
 .scale b { color: var(--text); min-width: 72px; }
 .samples-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 22px; }
 .sample { background: var(--panel); border: 1px solid var(--border); border-radius: 22px; padding: 16px; }
+.sample h2 { font-size: 19px; margin-top: 14px; overflow-wrap: anywhere; }
+.sample-meta { color: var(--muted); margin: 8px 0 16px; }
+.sample-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .empty { background: var(--panel-soft); border: 1px dashed var(--border); border-radius: 20px; padding: 24px; margin-top: 22px; }
 .notice { border-left: 4px solid var(--accent); padding-left: 14px; }
 @media (max-width: 860px) { .hero, .grid { grid-template-columns: 1fr; } main { padding-top: 20px; } }
@@ -108,6 +111,38 @@ model_service = ModelService()
 static_dir = Path(__file__).resolve().parent / "static"
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+
+def discover_sample_images() -> list[dict[str, str]]:
+    samples_dir = static_dir / "samples"
+    if not samples_dir.exists():
+        return []
+
+    samples: list[dict[str, str]] = []
+    supported_extensions = {".jpg", ".jpeg", ".png", ".webp"}
+
+    for file_path in sorted(samples_dir.iterdir(), key=lambda path: path.name.lower()):
+        if not file_path.is_file() or file_path.suffix.lower() not in supported_extensions:
+            continue
+
+        match = re.search(r"_(?P<grade>[0-4])\.[^.]+$", file_path.name)
+        if not match:
+            continue
+
+        grade = match.group("grade")
+        severity = SEVERITY_LABELS[grade].split(" — ", 1)[1]
+
+        samples.append(
+            {
+                "filename": file_path.name,
+                "grade": grade,
+                "severity": severity,
+                "src": f"/static/samples/{file_path.name}",
+                "title": file_path.stem.replace("_", " "),
+            }
+        )
+
+    return sorted(samples, key=lambda item: (item["grade"], item["filename"].lower()))
 
 
 def page_shell(title: str, body: str) -> str:
@@ -185,11 +220,11 @@ def index() -> str:
           <section class="card" style="margin-top: 22px;">
             <h2>Escala de saída do modelo</h2>
             <div class="scale">
-              <div><b>Grau 0</b><span>Sem retinopatia diabética aparente.</span></div>
-              <div><b>Grau 1</b><span>Retinopatia diabética leve.</span></div>
-              <div><b>Grau 2</b><span>Retinopatia diabética moderada.</span></div>
-              <div><b>Grau 3</b><span>Retinopatia diabética severa.</span></div>
-              <div><b>Grau 4</b><span>Retinopatia diabética proliferativa, estágio mais grave na escala do protótipo.</span></div>
+              <div><b>Grau 0</b><span>Sem retinopatia diabética.</span></div>
+              <div><b>Grau 1</b><span>Retinopatia leve.</span></div>
+              <div><b>Grau 2</b><span>Retinopatia moderada.</span></div>
+              <div><b>Grau 3</b><span>Retinopatia grave.</span></div>
+              <div><b>Grau 4</b><span>Retinopatia diabética proliferativa.</span></div>
             </div>
           </section>
         </main>
@@ -258,17 +293,22 @@ def index() -> str:
 
 @app.get("/samples", response_class=HTMLResponse)
 def samples() -> str:
-    if SAMPLE_IMAGES:
+    sample_images = discover_sample_images()
+
+    if sample_images:
         cards = "".join(
             f"""
             <article class="sample">
-              <img src="{item['src']}" alt="{item['title']}" />
-              <h2>{item['title']}</h2>
-              <p><strong>Classificação esperada:</strong> {item['grade']} — {item['severity']}</p>
-              <a class="button" href="{item['src']}" download>Baixar imagem</a>
+              <img src="{escape(item['src'])}" alt="Imagem de fundo de olho {escape(item['filename'])}" />
+              <h2>{escape(item['filename'])}</h2>
+              <p class="sample-meta"><strong>Classificação esperada:</strong> Grau {item['grade']} — {escape(item['severity'])}</p>
+              <div class="sample-actions">
+                <a class="button" href="{escape(item['src'])}" download>Baixar imagem</a>
+                <a class="button secondary" href="{escape(item['src'])}" target="_blank" rel="noreferrer">Abrir imagem</a>
+              </div>
             </article>
             """
-            for item in SAMPLE_IMAGES
+            for item in sample_images
         )
     else:
         cards = """
@@ -290,6 +330,7 @@ def samples() -> str:
             <h1>Imagens para teste do modelo</h1>
             <p>
               Use estas imagens para demonstrar a classificação do protótipo em diferentes graus de retinopatia diabética.
+              O grau esperado é identificado no final do nome do arquivo, antes da extensão.
             </p>
             <div class="links">
               <a class="button" href="/">Voltar para inferência</a>
